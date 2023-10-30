@@ -194,10 +194,10 @@ jobs:
     if: "!startsWith(github.ref, 'refs/heads/release-library/')"
 
     env:
-      IMG_BASE: ghcr.io/getsentry/${{ matrix.image_name }}
-      IMG_DEPS: ghcr.io/getsentry/${{ matrix.image_name }}-deps:${{ matrix.arch }}
+      IMG_BASE: ghcr.io/3rvklin/${{ matrix.image_name }}
+      IMG_DEPS: ghcr.io/3rvklin/${{ matrix.image_name }}-deps:${{ matrix.arch }}
       # GITHUB_SHA in pull requests points to the merge commit
-      IMG_VERSIONED: ghcr.io/getsentry/${{ matrix.image_name }}:${{ github.event.pull_request.head.sha || github.sha }}
+      IMG_VERSIONED: ghcr.io/3rvklin/${{ matrix.image_name }}:${{ github.event.pull_request.head.sha || github.sha }}
       ARCH: ${{ matrix.arch }}
 
     steps:
@@ -267,7 +267,7 @@ jobs:
     env:
       # GITHUB_SHA in pull requests points to the merge commit
       REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
-      IMG_VERSIONED: ghcr.io/getsentry/${{ matrix.image_name }}:${{ github.event.pull_request.head.sha || github.sha }}
+      IMG_VERSIONED: ghcr.io/3rvklin/${{ matrix.image_name }}:${{ github.event.pull_request.head.sha || github.sha }}
 
     steps:
       - name: Download Docker Image
@@ -348,7 +348,7 @@ jobs:
           - 6379:6379
 
       # Kafka + Zookeeper version synced with
-      # https://github.com/getsentry/sentry/blob/363509c242aff197409207ce4990fb061f3534a3/.github/actions/setup-sentry/action.yml#L174
+      # https://github.com/3rvklin/sentry/blob/363509c242aff197409207ce4990fb061f3534a3/.github/actions/setup-sentry/action.yml#L174
 
       zookeeper:
         image: confluentinc/cp-zookeeper:4.1.0
@@ -407,14 +407,14 @@ jobs:
       - name: Checkout Sentry
         uses: actions/checkout@v4
         with:
-          repository: getsentry/sentry
+          repository: 3rvklin/sentry
           path: sentry
 
       - name: Setup steps
         id: setup
         run: |
           # GITHUB_SHA in pull requests points to the merge commit
-          RELAY_TEST_IMAGE=ghcr.io/getsentry/relay:${{ github.event.pull_request.head.sha || github.sha }}
+          RELAY_TEST_IMAGE=ghcr.io/3rvklin/relay:${{ github.event.pull_request.head.sha || github.sha }}
           echo "We expected GCB to push this image $RELAY_TEST_IMAGE"
           echo "relay-test-image=$RELAY_TEST_IMAGE" >> "$GITHUB_OUTPUT"
           # We cannot execute actions that are not placed under .github of the main repo
@@ -455,20 +455,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - timeout-minutes: 20
-        run: until docker pull "ghcr.io/getsentry/relay:${{ github.sha }}" 2>/dev/null; do sleep 10; done
+        run: until docker pull "ghcr.io/3rvklin/relay:${{ github.sha }}" 2>/dev/null; do sleep 10; done
       - name: Push built docker image
         shell: bash
         run: |
-          IMAGE_URL="ghcr.io/getsentry/relay:${{ github.sha }}"
-          docker login --username=sentrybuilder --password ${{ secrets.DOCKER_HUB_RW_TOKEN }}
+          IMAGE_URL="ghcr.io/3rvklin/relay:${{ github.sha }}"
+          docker login --username=3rvklin --password ${{ secrets.DOCKER_HUB_RW_TOKEN }}
           # We push 3 tags to Dockerhub:
           # first, the full sha of the commit
-          docker tag "$IMAGE_URL" getsentry/relay:${GITHUB_SHA}
-          docker push getsentry/relay:${GITHUB_SHA}
+          docker tag "$IMAGE_URL" 3rvklin/relay:${GITHUB_SHA}
+          docker push 3rvklin/relay:${GITHUB_SHA}
           # second, the short sha of the commit
           SHORT_SHA=$(git rev-parse --short "$GITHUB_SHA")
-          docker tag "$IMAGE_URL" getsentry/relay:${SHORT_SHA}
-          docker push getsentry/relay:${SHORT_SHA}
+          docker tag "$IMAGE_URL" 3rvklin/relay:${SHORT_SHA}
+          docker push 3rvklin/relay:${SHORT_SHA}
           # finally, nightly
-          docker tag "$IMAGE_URL" getsentry/relay:nightly
-          docker push getsentry/relay:nightly
+          docker tag "$IMAGE_URL" 3rvklin/relay:nightly
+          docker push 3rvklin/relay:nightly
